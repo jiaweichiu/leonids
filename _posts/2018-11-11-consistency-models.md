@@ -45,7 +45,7 @@ As we expect, it means transactions appear to execute sequentially (serializable
 
 Both sequential consistency and linearizability are about single operations. Sequential consistency is somewhat similar to serializability: it is for single operations instead of transactions. It says that no matter how you execute the operations concurrently, it is as if there is some order or permutation of these operations across all processors.
 
-Formal definition:
+Formal definition of sequential consistency:
 > the result of any execution is the same as if the operations of all the processors were executed in some sequential order, and the operations of each individual processor appear in this sequence in the order specified by its program
 
 Sequential consistency only claims there exists such an order of operations (program order). Linearizability is a stronger condition and implies sequential consistency. It says there exists such an order and moreover, this order is the order in which these operations or requests arrive.
