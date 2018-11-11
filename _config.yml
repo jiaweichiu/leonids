@@ -3,9 +3,9 @@
 # Site wide configuration
 ####################################
 #
-title: Leonids
+title: Blog of Jiawei Chiu
 email:
-description: A simple and awesome blog theme powered by jekyll.
+description: A simple blog!
 url: # the base hostname & protocol for your site
 keywords: ["blog", "jekyll"]
 
@@ -33,10 +33,10 @@ kramdown:
 ####################################
 #
 owner:
-  name: Leonids
-  avatar: leonids-logo.png
-  job: "A jekyll theme"
-  bio: "A simple and awesome blog theme powered by jekyll."
+  name: Jiawei
+  avatar: "solth07212011.jpg"
+  job: "Software engineer"
+  bio: "Just a simple blog that I hope to maintain!"
   email:
   disqus-shortname:
   twitter: #username
