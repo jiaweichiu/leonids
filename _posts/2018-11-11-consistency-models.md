@@ -7,7 +7,7 @@ math: true
 excerpt: "Understand the various consistency models out there."
 ---
 
-Let's take a look at this "graph" of [consistency models at jepsen.io](https://jepsen.io/consistency).
+Let's take a look at this tree of [consistency models at jepsen.io](https://jepsen.io/consistency).
 
 ![consistency models from jepsen.io](/img/jepsen_consistency.png)
 
@@ -61,3 +61,21 @@ One key feature of snapshot isolation is that when the transaction is done, its 
 Unlike serializability which requires a total order, snapshot isolation only requires a partial order --- sub-operations in transactions may interleave in arbitrary ways as long as there are no conflicts between the transactions.
 
 Remark: If I were to build a database, I will probably go with this model as well.
+
+Most notable problem with snapshot isolation is *write skews*. Consider the following scenario:
+* Transaction 1 reads variable x.
+* Transaction 2 reads variable y.
+* Transaction 1 writes the value it read to y. (y <- x)
+* Transaction 2 writes the value it read to x. (x <- y)
+
+Both transactions have a consistent view of the database and their write set do not overlap. However, we see that the values of x, y have been swapped. Suppose we have serializability instead and say transaction 1 completes before transaction 2. Then everything would be set to the initial value of x. There will be no swapping.
+
+Various databases have some hacks around snapshot isolation to mitigate the problem of write skews. See for example Postgres' [Serializable Snapshot Isolation technique](https://drkp.net/papers/ssi-vldb12.pdf).
+
+# Read Committed (total available)
+
+For models like "snapshot isolation", total availability is still impossible (during network partition) because we need a snapshot which is consistent across the cluster of machines. To obtain total availability, we can consider the "read committed" model.
+
+The read committed model is a transactional multi-object model. All it says is that transactions cannot observe writes from other transactions which have not committed, i.e., no dirty reads. However, there is no constraint on the ordering. That means if transaction 1 commits a write to variable X and transaction 2 starts and reads variable X, then the value read by transaction 2 may not be the value written by transaction 1. (If we need to sync the new value of X across all machines, then we will lose availability during network partitions.)
+
+Read committed can be achieved by *locking* on each row / key. There are some obvious problems. Say we want to count rows which fulfills a certain predicate. As we scan through rows in a transaction, we lock and unlock row by row, while concurrent transactions may be changing other rows that are not locked. If a row somehow gets shifted after the scan pointer, then it gets counted twice. If a row gets shifted before the scan pointer, then it does not get counted.
