@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Design a parking lot"
-categories: [system design]
+categories: [systems]
 comments: false
 math: true
 excerpt: "Typical system design question. Design a parking lot."
