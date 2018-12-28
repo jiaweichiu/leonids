@@ -31,7 +31,7 @@ where the confidence value $$c_{ui} = 1+\alpha r_{ui}$$ or $$c_{ui} = 1+\alpha \
 
 # ALS modified for implicit
 
-ALS works by fixing X, solving for Y and vice versa, repeatedly. For the explicit dataset, the solution for $$x_u$$ is
+ALS works by fixing X, solving for Y and vice versa, repeatedly. For the explicit dataset, the solution for $$x_u$$ (for every user u) is
 
 $$ x_u = (Y^T Y + \lambda I)^{-1} Y^T R(u) $$
 
@@ -54,4 +54,6 @@ The term $$Y^T Y$$ can be computed just once and used for every user u. Say Y is
 Solving for $$y_i$$'s is similar and we omit the details.
 
 # Remarks
-I thought the computation trick is very smart, even if it looks obvious in hindsight. While solving ALS is fast, evaluating any recommender solution can be the bottleneck instead. There are some tricks here but we will consider these another time.
+Sparse, diagonal, low rank matrices are nice to work with, and so are linear combinations of them. Here we are using "diagonal + sparse".
+
+As of Dec 2018, Spark only supports ALS for implicit datasets/feedback. See for example [this link](https://spark.apache.org/docs/latest/mllib-collaborative-filtering.html#collaborative-filtering). I guess the reason is that in practice, it is rare to find large explicit datasets that needs the brute force of Spark, whereas implicit datasets tend to be much bigger and common.
