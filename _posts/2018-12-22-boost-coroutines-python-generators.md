@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Boost coroutines as Python generators"
-categories: [ml]
+categories: [systems]
 comments: false
 math: true
 excerpt: "Boost coroutines can be used to build Python generators."
