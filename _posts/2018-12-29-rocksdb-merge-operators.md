@@ -304,4 +304,25 @@ data: "iii"
 data: "jjj"
 ```
 
-We are still puzzled why forcing a compaction after the snapshot is released did not cause a full merge (involving one operand) to happen. We have tried sleeping after releasing the snapshot and also creating more snapshots so that there's two partial merges and two operands instead of one. However, we still observe no full merge when we compact after the release of snapshot(s). We are not sure why. In fact, even if we restart the program and reload the database and force a compaction, we still do not see a full merge happens due to the compaction. It is as if the snapshots are 
+We are still puzzled why forcing a compaction after the snapshot is released did not cause a full merge (involving one operand) to happen. We have tried sleeping after releasing the snapshot and also creating more snapshots so that there's two partial merges and two operands instead of one. However, we still observe no full merge when we compact after the release of snapshot(s). We are not sure why. In fact, even if we restart the program and reload the database and force a compaction, we still do not see a full merge happens due to the compaction. It is as if the snapshots are
+
+# Addenum: CompactRange vs CompactFiles
+We realize that `CompactRange` only flushes the memtable to L0 SSTables on disk. When we call `CompactRange` the second time, the memtable is empty and the L0 SSTables are small and do not need compaction. Hence, nothing happens. No merge. No compaction.
+
+To force a compaction of the L0 SSTables, after the snapshot is released, we need to use `CompactFiles`. In the main, we can use `FlushedFileCollector` (found in RocksDB unit tests) to get the list of flushed files after the first compaction. Then we can pass these files to `CompactFiles`.
+
+```cpp
+Options rdb_opt;
+FlushedFileCollector *collector = new FlushedFileCollector();
+rdb_opt.listeners.emplace_back(collector);
+```
+
+In the actual run:
+```cpp
+LOG(INFO) << "Forcing compaction via CompactFiles";
+// Now that snapshot is released, this should merge the two segments.
+vector<string> files = collector->GetFlushedFiles();
+db->CompactFiles(CompactionOptions(), files, 0);
+```
+
+You will observe the full merge of two segments, one due to `PartialMerge` earlier, the other due to `FullMerge` earlier. Previously, these two segments cannot be merged due to a snapshot being held. After `CompactFiles`, subsequent GET requests do not require any merging.
