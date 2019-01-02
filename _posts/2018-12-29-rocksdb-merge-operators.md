@@ -304,7 +304,7 @@ data: "iii"
 data: "jjj"
 ```
 
-We are still puzzled why forcing a compaction after the snapshot is released did not cause a full merge (involving one operand) to happen. We have tried sleeping after releasing the snapshot and also creating more snapshots so that there's two partial merges and two operands instead of one. However, we still observe no full merge when we compact after the release of snapshot(s). We are not sure why. In fact, even if we restart the program and reload the database and force a compaction, we still do not see a full merge happens due to the compaction. It is as if the snapshots are
+We are still puzzled why forcing a compaction after the snapshot is released did not cause a full merge (involving one operand) to happen. We have tried sleeping after releasing the snapshot and also creating more snapshots so that there's two partial merges and two operands instead of one. However, we still observe no full merge when we compact after the release of snapshot(s). We are not sure why. In fact, even if we restart the program and reload the database and force a compaction, we still do not see a full merge happens due to the compaction.
 
 # Addenum: CompactRange vs CompactFiles
 We realize that `CompactRange` only flushes the memtable to L0 SSTables on disk. When we call `CompactRange` the second time, the memtable is empty and the L0 SSTables are small and do not need compaction. Hence, nothing happens. No merge. No compaction.
